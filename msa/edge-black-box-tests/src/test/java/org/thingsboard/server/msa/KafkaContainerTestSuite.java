@@ -81,6 +81,8 @@ public class KafkaContainerTestSuite {
                         .withEnv(installTb.getEnv())
                         .withEnv(env)
                         .withExposedService(TB_MONOLITH_SERVICE_NAME, 8080)
+                        .withExposedService("tb-zookeeper", 2182)
+                        .withExposedService("tb-kafka", 9095)
                         .withExposedService(TB_EDGE_SERVICE_NAME + "-2", 8083)
                         .withExposedService("zookeeper", 2181)
                         .withExposedService("kafka", 9092);
