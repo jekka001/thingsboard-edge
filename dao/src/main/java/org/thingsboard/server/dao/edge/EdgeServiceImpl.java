@@ -61,6 +61,7 @@ import org.thingsboard.server.common.data.rule.RuleChain;
 import org.thingsboard.server.common.data.rule.RuleNode;
 import org.thingsboard.server.dao.attributes.AttributesService;
 import org.thingsboard.server.dao.entity.AbstractCachedEntityService;
+import org.thingsboard.server.dao.entity.EntityCountService;
 import org.thingsboard.server.dao.eventsourcing.ActionEntityEvent;
 import org.thingsboard.server.dao.eventsourcing.DeleteEntityEvent;
 import org.thingsboard.server.dao.eventsourcing.SaveEntityEvent;
@@ -127,6 +128,9 @@ public class EdgeServiceImpl extends AbstractCachedEntityService<EdgeCacheKey, E
     @Lazy
     private RelatedEdgesService relatedEdgesService;
 
+    @Autowired
+    private EntityCountService countService;
+
     @Value("${edges.enabled}")
     @Getter
     private boolean edgesEnabled;
@@ -190,26 +194,16 @@ public class EdgeServiceImpl extends AbstractCachedEntityService<EdgeCacheKey, E
 
     @Override
     public Edge saveEdge(Edge edge) {
-        return saveEdge(edge, true);
-    }
-
-    @Override
-    public Edge saveEdge(Edge edge, boolean doValidate) {
         log.trace("Executing saveEdge [{}]", edge);
-        Edge oldEdge = null;
-        if (doValidate) {
-            oldEdge = edgeValidator.validate(edge, Edge::getTenantId);
-        } else if (edge.getId() != null) {
-            oldEdge = findEdgeById(edge.getTenantId(), edge.getId());
-        }
+        Edge oldEdge = edgeValidator.validate(edge, Edge::getTenantId);
         EdgeCacheEvictEvent evictEvent = new EdgeCacheEvictEvent(edge.getTenantId(), edge.getName(), oldEdge != null ? oldEdge.getName() : null);
         try {
             Edge savedEdge = edgeDao.save(edge.getTenantId(), edge);
             publishEvictEvent(evictEvent);
-            // edge-only: event should be published on the Cloud
-            if (edgesEnabled) {
-                eventPublisher.publishEvent(SaveEntityEvent.builder().tenantId(savedEdge.getTenantId())
-                        .entityId(savedEdge.getId()).entity(savedEdge).created(edge.getId() == null).build());
+            eventPublisher.publishEvent(SaveEntityEvent.builder().tenantId(savedEdge.getTenantId())
+                    .entityId(savedEdge.getId()).entity(savedEdge).created(edge.getId() == null).build());
+            if (edge.getId() == null) {
+                countService.publishCountEntityEvictEvent(savedEdge.getTenantId(), EntityType.EDGE);
             }
             return savedEdge;
         } catch (Exception t) {
@@ -265,10 +259,8 @@ public class EdgeServiceImpl extends AbstractCachedEntityService<EdgeCacheKey, E
         edgeDao.removeById(tenantId, edgeId.getId());
 
         publishEvictEvent(new EdgeCacheEvictEvent(edge.getTenantId(), edge.getName(), null));
-        // edge-only: event should be published on the Cloud
-        if (edgesEnabled) {
-            eventPublisher.publishEvent(DeleteEntityEvent.builder().tenantId(tenantId).entityId(edgeId).build());
-        }
+        countService.publishCountEntityEvictEvent(tenantId, EntityType.EDGE);
+        eventPublisher.publishEvent(DeleteEntityEvent.builder().tenantId(tenantId).entityId(edgeId).build());
     }
 
     @Override
@@ -618,6 +610,11 @@ public class EdgeServiceImpl extends AbstractCachedEntityService<EdgeCacheKey, E
             result.add(ruleChain);
         }
         return result;
+    }
+
+    @Override
+    public long countByTenantId(TenantId tenantId) {
+        return edgeDao.countByTenantId(tenantId);
     }
 
     @Override

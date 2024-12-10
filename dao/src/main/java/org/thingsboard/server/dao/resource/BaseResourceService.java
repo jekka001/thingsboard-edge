@@ -415,6 +415,7 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
         Map<String, String> links = getResourcesLinks(widgetTypeDetails.getResources());
         List<JsonNode> jsonNodes = new ArrayList<>(2);
         List<Map<String, String>> mappings = new ArrayList<>(2);
+
         if (widgetTypeDetails.getDescriptor() != null) {
             jsonNodes.add(widgetTypeDetails.getDescriptor());
             mappings.add(WIDGET_RESOURCES_MAPPING);
@@ -425,6 +426,7 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
             jsonNodes.add(defaultConfig);
             mappings.add(WIDGET_DEFAULT_CONFIG_RESOURCES_MAPPING);
         }
+
         boolean updated = updateResourcesUsage(tenantId, jsonNodes, mappings, links);
         if (defaultConfig != null) {
             widgetTypeDetails.setDefaultConfig(defaultConfig);
@@ -481,9 +483,11 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
         return getUsedResources(tenantId, List.of(dashboard.getConfiguration()), List.of(DASHBOARD_RESOURCES_MAPPING)).values();
     }
 
+    @Override
     public Collection<TbResourceInfo> getUsedResources(TenantId tenantId, WidgetTypeDetails widgetTypeDetails) {
         List<JsonNode> jsonNodes = new ArrayList<>(2);
         List<Map<String, String>> mappings = new ArrayList<>(2);
+
         jsonNodes.add(widgetTypeDetails.getDescriptor());
         mappings.add(WIDGET_RESOURCES_MAPPING);
 
@@ -492,6 +496,7 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
             jsonNodes.add(defaultConfig);
             mappings.add(WIDGET_DEFAULT_CONFIG_RESOURCES_MAPPING);
         }
+
         return getUsedResources(tenantId, jsonNodes, mappings).values();
     }
 
@@ -539,6 +544,7 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
 
     private boolean processResources(List<JsonNode> jsonNodes, List<Map<String, String>> mappings, UnaryOperator<String> processor) {
         AtomicBoolean updated = new AtomicBoolean(false);
+
         for (int i = 0; i < jsonNodes.size(); i++) {
             JsonNode jsonNode = jsonNodes.get(i);
             // processing by mappings first
@@ -553,17 +559,13 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
                             value = id.asText();
                         }
                     }
-            if (StringUtils.isNotBlank(value)) {
-                value = processor.apply(value);
-            } else {
-                value = "";
-            }
 
                     if (StringUtils.isNotBlank(value)) {
                         value = processor.apply(value);
                     } else {
                         value = "";
                     }
+
                     JsonNode newValue = new TextNode(value);
                     if (!newValue.toString().equals(urlNode.toString())) {
                         updated.set(true);
@@ -572,10 +574,14 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
                     return newValue;
                 });
             }
+
+
+            // processing all
             JacksonUtil.replaceAll(jsonNode, "", (name, value) -> {
                 if (!StringUtils.startsWith(value, DataConstants.TB_RESOURCE_PREFIX + "/api/resource/")) {
                     return value;
                 }
+
                 String newValue = processor.apply(value);
                 if (StringUtils.equals(value, newValue)) {
                     return value;
@@ -586,6 +592,7 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
                 }
             });
         }
+
         return updated.get();
     }
 
