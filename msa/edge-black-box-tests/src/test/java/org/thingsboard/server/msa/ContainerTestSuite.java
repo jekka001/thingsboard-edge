@@ -85,6 +85,8 @@ public class ContainerTestSuite {
                         .withEnv(installTb.getEnv())
                         .withEnv(env)
                         .withExposedService(TB_MONOLITH_SERVICE_NAME, 8080)
+                        .withExposedService("tb-zookeeper", 2182)
+                        .withExposedService("tb-kafka", 9095)
                         .withExposedService(TB_EDGE_SERVICE_NAME + "-1", 8082);
             } catch (Exception e) {
                 log.error("Failed to create test container", e);

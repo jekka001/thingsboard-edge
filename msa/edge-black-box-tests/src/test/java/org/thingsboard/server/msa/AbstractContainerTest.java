@@ -104,6 +104,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public abstract class AbstractContainerTest {
+    protected static final int WIDGET_BUNDLES_COUNT = 30;
     public static final List<String> CLOUD_ROUTING_KEYS = Arrays.asList("280629c7-f853-ee3d-01c0-fffbb6f2ef38", "e29dadb1-c487-3b9e-1b5a-02193191c90e");
     public static final List<String> CLOUD_ROUTING_SECRETS = Arrays.asList("g9ta4soeylw6smqkky8g", "dmb17p71vz9svfl7tgnz");
 
@@ -213,11 +214,10 @@ public abstract class AbstractContainerTest {
                 until(() -> {
                     try {
                         long totalElements = edgeRestClient.getWidgetsBundles(new PageLink(100)).getTotalElements();
-                        final long expectedCount = 28;
-                        if (totalElements != expectedCount) {
-                            log.warn("Expected {} widget bundles, but got {}", expectedCount, totalElements);
+                        if (totalElements != WIDGET_BUNDLES_COUNT) {
+                            log.warn("Expected {} widget bundles, but got {}", WIDGET_BUNDLES_COUNT, totalElements);
                         }
-                        return totalElements == expectedCount;
+                        return totalElements == WIDGET_BUNDLES_COUNT;
                     } catch (Throwable e) {
                         return false;
                     }
