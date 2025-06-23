@@ -27,8 +27,8 @@ import org.thingsboard.server.common.data.CloudUtils;
 import org.thingsboard.server.common.data.Customer;
 import org.thingsboard.server.common.data.EdgeUtils;
 import org.thingsboard.server.common.data.EntityType;
-import org.thingsboard.server.common.data.cloud.CloudEventType;
 import org.thingsboard.server.common.data.cf.CalculatedField;
+import org.thingsboard.server.common.data.cloud.CloudEventType;
 import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.edge.EdgeEvent;
 import org.thingsboard.server.common.data.edge.EdgeEventActionType;
@@ -355,14 +355,21 @@ public abstract class BaseEdgeProcessor implements EdgeProcessor {
         return entityDaoRegistry.getDao(entityId.getEntityType()).existsById(tenantId, entityId.getId());
     }
 
-    protected ListenableFuture<Void> requestForAdditionalData(TenantId tenantId, EntityId entityId) {
+    protected ListenableFuture<Void> requestForAdditionalData(TenantId tenantId, EntityId entityId, boolean includeCalculatedFields) {
         List<ListenableFuture<Void>> futures = new ArrayList<>();
         CloudEventType cloudEventType = CloudUtils.getCloudEventTypeByEntityType(entityId.getEntityType());
-        log.info("Adding ATTRIBUTES_REQUEST/RELATION_REQUEST {} {}", entityId, cloudEventType);
+        String calculatedLog = includeCalculatedFields ? "/CALCULATED_FIELD_REQUEST" : "";
+        log.info("Adding ATTRIBUTES_REQUEST/RELATION_REQUEST{} {} {}", calculatedLog, entityId, cloudEventType);
         futures.add(cloudEventService.saveCloudEventAsync(tenantId, cloudEventType,
                 EdgeEventActionType.ATTRIBUTES_REQUEST, entityId, null));
         futures.add(cloudEventService.saveCloudEventAsync(tenantId, cloudEventType,
                 EdgeEventActionType.RELATION_REQUEST, entityId, null));
+
+        if (includeCalculatedFields) {
+            futures.add(cloudEventService.saveCloudEventAsync(tenantId, cloudEventType,
+                    EdgeEventActionType.CALCULATED_FIELD_REQUEST, entityId, null));
+        }
+
         return Futures.transform(Futures.allAsList(futures), voids -> null, dbCallbackExecutorService);
     }
 

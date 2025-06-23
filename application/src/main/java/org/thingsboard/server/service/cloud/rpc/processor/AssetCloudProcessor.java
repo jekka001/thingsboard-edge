@@ -55,7 +55,7 @@ public class AssetCloudProcessor extends BaseAssetProcessor {
             return switch (assetUpdateMsg.getMsgType()) {
                 case ENTITY_CREATED_RPC_MESSAGE, ENTITY_UPDATED_RPC_MESSAGE -> {
                     boolean created = saveOrUpdateAssetFromCloud(tenantId, assetId, assetUpdateMsg);
-                    yield created ? requestForAdditionalData(tenantId, assetId) : Futures.immediateFuture(null);
+                    yield created ? requestForAdditionalData(tenantId, assetId, true) : Futures.immediateFuture(null);
                 }
                 case ENTITY_DELETED_RPC_MESSAGE -> {
                     Asset assetById = edgeCtx.getAssetService().findAssetById(tenantId, assetId);

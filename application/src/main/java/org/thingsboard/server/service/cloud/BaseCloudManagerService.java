@@ -521,6 +521,7 @@ public abstract class BaseCloudManagerService extends TbApplicationEventListener
         cloudCtx.getEdgeProcessor().processEdgeConfigurationMsgFromCloud(tenantId, edgeConfiguration);
         cloudCtx.getCloudEventService().saveCloudEvent(tenantId, CloudEventType.EDGE, EdgeEventActionType.ATTRIBUTES_REQUEST, edgeId, null);
         cloudCtx.getCloudEventService().saveCloudEvent(tenantId, CloudEventType.EDGE, EdgeEventActionType.RELATION_REQUEST, edgeId, null);
+        cloudCtx.getCloudEventService().saveCloudEvent(tenantId, CloudEventType.EDGE, EdgeEventActionType.CALCULATED_FIELD_REQUEST, edgeId, null);
     }
 
     private EdgeSettings constructEdgeSettings(EdgeConfiguration edgeConfiguration) {
@@ -664,6 +665,7 @@ public abstract class BaseCloudManagerService extends TbApplicationEventListener
                         cloudCtx.getTelemetryProcessor().convertTelemetryEventToUplink(cloudEvent.getTenantId(), cloudEvent);
                 case ATTRIBUTES_REQUEST -> cloudCtx.getTelemetryProcessor().convertAttributesRequestEventToUplink(cloudEvent);
                 case RELATION_REQUEST -> cloudCtx.getRelationProcessor().convertRelationRequestEventToUplink(cloudEvent);
+                case CALCULATED_FIELD_REQUEST -> cloudCtx.getCalculatedFieldProcessor().convertCalculatedFieldRequestEventToUplink(cloudEvent);
                 case RPC_CALL -> cloudCtx.getDeviceProcessor().convertRpcCallEventToUplink(cloudEvent);
                 default -> {
                     log.warn("Unsupported action type [{}]", cloudEvent);

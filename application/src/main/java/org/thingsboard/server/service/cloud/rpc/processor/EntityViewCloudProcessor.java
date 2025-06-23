@@ -53,7 +53,7 @@ public class EntityViewCloudProcessor extends BaseEntityViewProcessor {
             return switch (entityViewUpdateMsg.getMsgType()) {
                 case ENTITY_CREATED_RPC_MESSAGE, ENTITY_UPDATED_RPC_MESSAGE -> {
                     boolean created = saveOrUpdateEntityViewFromCloud(tenantId, entityViewId, entityViewUpdateMsg);
-                    yield created ? requestForAdditionalData(tenantId, entityViewId) : Futures.immediateFuture(null);
+                    yield created ? requestForAdditionalData(tenantId, entityViewId, false) : Futures.immediateFuture(null);
                 }
                 case ENTITY_DELETED_RPC_MESSAGE -> {
                     EntityView entityViewById = edgeCtx.getEntityViewService().findEntityViewById(tenantId, entityViewId);

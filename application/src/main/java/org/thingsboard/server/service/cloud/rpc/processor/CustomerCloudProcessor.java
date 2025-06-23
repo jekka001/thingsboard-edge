@@ -63,7 +63,7 @@ public class CustomerCloudProcessor extends BaseEdgeProcessor {
                     } finally {
                         customerCreationLock.unlock();
                     }
-                    return requestForAdditionalData(tenantId, customerId);
+                    return requestForAdditionalData(tenantId, customerId, false);
                 case ENTITY_DELETED_RPC_MESSAGE:
                     Customer customerById = edgeCtx.getCustomerService().findCustomerById(tenantId, customerId);
                     if (customerById != null) {

@@ -70,7 +70,7 @@ public class DeviceCloudProcessor extends BaseDeviceProcessor {
             return switch (deviceUpdateMsg.getMsgType()) {
                 case ENTITY_CREATED_RPC_MESSAGE, ENTITY_UPDATED_RPC_MESSAGE -> {
                     boolean created = saveOrUpdateDeviceFromCloud(tenantId, deviceId, deviceUpdateMsg);
-                    yield created ? requestForAdditionalData(tenantId, deviceId) : Futures.immediateFuture(null);
+                    yield created ? requestForAdditionalData(tenantId, deviceId, true) : Futures.immediateFuture(null);
                 }
                 case ENTITY_DELETED_RPC_MESSAGE -> {
                     Device deviceById = edgeCtx.getDeviceService().findDeviceById(tenantId, deviceId);

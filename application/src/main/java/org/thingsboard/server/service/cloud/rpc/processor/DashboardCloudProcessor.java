@@ -58,7 +58,7 @@ public class DashboardCloudProcessor extends BaseDashboardProcessor {
                     boolean created = super.saveOrUpdateDashboard(tenantId, dashboardId, dashboardUpdateMsg, customerId);
                     if (created) {
                         pushDashboardCreatedEventToRuleEngine(tenantId, dashboardId);
-                        return requestForAdditionalData(tenantId, dashboardId);
+                        return requestForAdditionalData(tenantId, dashboardId, false);
                     }
                     return Futures.immediateFuture(null);
                 case ENTITY_DELETED_RPC_MESSAGE:

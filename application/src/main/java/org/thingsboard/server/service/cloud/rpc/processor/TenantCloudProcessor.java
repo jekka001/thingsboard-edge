@@ -62,7 +62,7 @@ public class TenantCloudProcessor extends BaseEdgeProcessor {
                 apiUsageStateService.createDefaultApiUsageState(savedTenant.getId(), null);
             } catch (Exception ignored) {}
 
-            requestForAdditionalData(tenantId, tenantId).get();
+            requestForAdditionalData(tenantId, tenantId, false).get();
         } finally {
             cloudSynchronizationManager.getSync().remove();
         }

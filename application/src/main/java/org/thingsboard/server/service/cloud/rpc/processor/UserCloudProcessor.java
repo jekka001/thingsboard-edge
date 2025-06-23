@@ -64,7 +64,7 @@ public class UserCloudProcessor extends BaseEdgeProcessor {
                     } finally {
                         userCreationLock.unlock();
                     }
-                    return requestForAdditionalData(tenantId, userId);
+                    return requestForAdditionalData(tenantId, userId, false);
                 case ENTITY_DELETED_RPC_MESSAGE:
                     User userToDelete = edgeCtx.getUserService().findUserById(tenantId, userId);
                     if (userToDelete != null) {
