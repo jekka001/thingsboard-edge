@@ -165,6 +165,12 @@ public class SecretServiceImpl extends AbstractEntityService implements SecretSe
     }
 
     @Override
+    public PageData<Secret> findSecretsByTenantId(TenantId tenantId, PageLink pageLink) {
+        log.trace("Executing findSecretsByTenantId [{}]", tenantId);
+        return secretDao.findByTenantId(tenantId, pageLink);
+    }
+
+    @Override
     public Secret findSecretById(TenantId tenantId, SecretId secretId) {
         log.trace("Executing findSecretById [{}] [{}]", tenantId, secretId);
         return secretDao.findById(tenantId, secretId.getId());

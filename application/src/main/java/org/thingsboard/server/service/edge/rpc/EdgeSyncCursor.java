@@ -47,6 +47,7 @@ import org.thingsboard.server.service.edge.rpc.fetch.DefaultProfilesEdgeEventFet
 import org.thingsboard.server.service.edge.rpc.fetch.DeviceGroupOtaPackageEdgeEventFetcher;
 import org.thingsboard.server.service.edge.rpc.fetch.DeviceProfilesEdgeEventFetcher;
 import org.thingsboard.server.service.edge.rpc.fetch.EdgeEventFetcher;
+import org.thingsboard.server.service.edge.rpc.fetch.EncryptionKeyEdgeEventFetcher;
 import org.thingsboard.server.service.edge.rpc.fetch.EntityGroupEdgeEventFetcher;
 import org.thingsboard.server.service.edge.rpc.fetch.IntegrationsEdgeEventFetcher;
 import org.thingsboard.server.service.edge.rpc.fetch.NotificationRuleEdgeEventFetcher;
@@ -58,6 +59,7 @@ import org.thingsboard.server.service.edge.rpc.fetch.PublicCustomerUserGroupEdge
 import org.thingsboard.server.service.edge.rpc.fetch.QueuesEdgeEventFetcher;
 import org.thingsboard.server.service.edge.rpc.fetch.RuleChainsEdgeEventFetcher;
 import org.thingsboard.server.service.edge.rpc.fetch.SchedulerEventsEdgeEventFetcher;
+import org.thingsboard.server.service.edge.rpc.fetch.SecretEdgeEventFetcher;
 import org.thingsboard.server.service.edge.rpc.fetch.SysAdminRolesEdgeEventFetcher;
 import org.thingsboard.server.service.edge.rpc.fetch.SystemCustomMenuEdgeEventFetcher;
 import org.thingsboard.server.service.edge.rpc.fetch.SystemWidgetTypesEdgeEventFetcher;
@@ -119,6 +121,8 @@ public class EdgeSyncCursor {
         fetchers.add(new EntityGroupEdgeEventFetcher(ctx.getEntityGroupService(), EntityType.DEVICE));
         fetchers.add(new EntityGroupEdgeEventFetcher(ctx.getEntityGroupService(), EntityType.ENTITY_VIEW));
         fetchers.add(new SchedulerEventsEdgeEventFetcher(ctx.getSchedulerEventService()));
+        fetchers.add(new EncryptionKeyEdgeEventFetcher(ctx.getEncryptionService()));
+        fetchers.add(new SecretEdgeEventFetcher(ctx.getSecretService()));
         if (fullSync) {
             fetchers.add(new NotificationTemplateEdgeEventFetcher(ctx.getNotificationTemplateService()));
             fetchers.add(new NotificationTargetEdgeEventFetcher(ctx.getNotificationTargetService()));

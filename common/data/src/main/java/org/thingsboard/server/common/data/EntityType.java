@@ -95,7 +95,8 @@ public enum EntityType {
     CALCULATED_FIELD(39),
     CALCULATED_FIELD_LINK(40),
     JOB(41),
-    SECRET(107);
+    SECRET(107),
+    ENCRYPTION_KEY(108);
 
     @Getter
     private final int protoNumber; // Corresponds to EntityTypeProto
