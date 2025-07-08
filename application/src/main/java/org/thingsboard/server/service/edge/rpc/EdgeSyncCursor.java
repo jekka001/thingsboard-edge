@@ -121,8 +121,6 @@ public class EdgeSyncCursor {
         fetchers.add(new EntityGroupEdgeEventFetcher(ctx.getEntityGroupService(), EntityType.DEVICE));
         fetchers.add(new EntityGroupEdgeEventFetcher(ctx.getEntityGroupService(), EntityType.ENTITY_VIEW));
         fetchers.add(new SchedulerEventsEdgeEventFetcher(ctx.getSchedulerEventService()));
-        fetchers.add(new EncryptionKeyEdgeEventFetcher(ctx.getEncryptionService()));
-        fetchers.add(new SecretEdgeEventFetcher(ctx.getSecretService()));
         if (fullSync) {
             fetchers.add(new NotificationTemplateEdgeEventFetcher(ctx.getNotificationTemplateService()));
             fetchers.add(new NotificationTargetEdgeEventFetcher(ctx.getNotificationTargetService()));
@@ -135,6 +133,8 @@ public class EdgeSyncCursor {
             fetchers.add(new CustomTranslationEdgeEventFetcher(ctx.getCustomerService(), ctx.getCustomTranslationService()));
             fetchers.add(new SystemCustomMenuEdgeEventFetcher(ctx.getCustomMenuService()));
             fetchers.add(new CustomMenuEdgeEventFetcher(ctx.getCustomMenuService()));
+            fetchers.add(new EncryptionKeyEdgeEventFetcher(ctx.getEncryptionService()));
+            fetchers.add(new SecretEdgeEventFetcher(ctx.getSecretService()));
         }
     }
 
