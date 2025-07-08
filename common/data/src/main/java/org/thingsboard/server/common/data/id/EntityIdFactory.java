@@ -154,8 +154,6 @@ public class EntityIdFactory {
                 return new JobId(uuid);
             case SECRET:
                 return new SecretId(uuid);
-            case ENCRYPTION_KEY:
-                return new EncryptionKeyId(uuid);
         }
         throw new IllegalArgumentException("EntityType " + type + " is not supported!");
     }
@@ -223,8 +221,6 @@ public class EntityIdFactory {
                 return new DomainId(uuid);
             case CALCULATED_FIELD:
                 return new CalculatedFieldId(uuid);
-            case ENCRYPTION_KEY:
-                return new EncryptionKeyId(uuid);
             case SECRET:
                 return new SecretId(uuid);
         }

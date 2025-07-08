@@ -32,18 +32,10 @@ package org.thingsboard.server.common.data.id;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.v3.oas.annotations.media.Schema;
-import org.thingsboard.server.common.data.EntityType;
 
 import java.util.UUID;
 
-public class EncryptionKeyId extends UUIDBased implements EntityId {
-
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "string", example = "ENCRYPTION_KEY", allowableValues = "ENCRYPTION_KEY")
-    @Override
-    public EntityType getEntityType() {
-        return EntityType.ENCRYPTION_KEY;
-    }
+public class EncryptionKeyId extends UUIDBased {
 
     @JsonCreator
     public EncryptionKeyId(@JsonProperty("id") UUID id) {

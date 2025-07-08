@@ -64,7 +64,7 @@ public class EncryptionKeyEdgeEventFetcher extends BasePageableEdgeEventFetcher<
                 edge.getId(),
                 EdgeEventType.ENCRYPTION_KEY,
                 EdgeEventActionType.ADDED,
-                entity.getId(),
+                null,
                 null
         );
     }
