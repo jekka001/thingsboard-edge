@@ -60,6 +60,7 @@ import org.thingsboard.server.queue.discovery.PartitionService;
 import org.thingsboard.server.queue.discovery.TbApplicationEventListener;
 import org.thingsboard.server.queue.discovery.event.PartitionChangeEvent;
 import org.thingsboard.server.service.cloud.rpc.CloudEventStorageSettings;
+import org.thingsboard.server.service.edge.stats.EdgeCommunicationStatsService;
 import org.thingsboard.server.service.executors.DbCallbackExecutorService;
 import org.thingsboard.server.service.state.DefaultDeviceStateService;
 import org.thingsboard.server.service.telemetry.TelemetrySubscriptionService;
@@ -139,6 +140,9 @@ public abstract class BaseCloudManagerService extends TbApplicationEventListener
 
     @Autowired(required = false)
     private CloudEventMigrationService cloudEventMigrationService;
+
+    @Autowired
+    protected EdgeCommunicationStatsService edgeStatsService;
 
     private ScheduledExecutorService uplinkExecutor;
     private ScheduledFuture<?> sendUplinkFuture;
@@ -537,6 +541,9 @@ public abstract class BaseCloudManagerService extends TbApplicationEventListener
     }
 
     private void onDownlink(DownlinkMsg downlinkMsg) {
+        edgeStatsService.incrementDownlinkMsgsAdded();
+        edgeStatsService.incrementDownlinkMsgsLag();
+
         boolean edgeCustomerIdUpdated = updateCustomerIdIfRequired(downlinkMsg);
         if (syncInProgress && downlinkMsg.hasSyncCompletedMsg()) {
             log.trace("[{}] downlinkMsg hasSyncCompletedMsg = true", downlinkMsg);
@@ -546,6 +553,9 @@ public abstract class BaseCloudManagerService extends TbApplicationEventListener
         Futures.addCallback(future, new FutureCallback<>() {
             @Override
             public void onSuccess(@Nullable List<Void> result) {
+                edgeStatsService.decrementDownlinkMsgsLag();
+                edgeStatsService.incrementDownlinkMsgsPushed();
+
                 log.trace("[{}] DownlinkMsg has been processed successfully! DownlinkMsgId {}", routingKey, downlinkMsg.getDownlinkMsgId());
                 DownlinkResponseMsg downlinkResponseMsg = DownlinkResponseMsg.newBuilder()
                         .setDownlinkMsgId(downlinkMsg.getDownlinkMsgId())
@@ -564,6 +574,10 @@ public abstract class BaseCloudManagerService extends TbApplicationEventListener
             public void onFailure(Throwable t) {
                 log.error("[{}] Failed to process DownlinkMsg! DownlinkMsgId {}", routingKey, downlinkMsg.getDownlinkMsgId());
                 String errorMsg = EdgeUtils.createErrorMsgFromRootCauseAndStackTrace(t);
+
+                edgeStatsService.decrementDownlinkMsgsLag();
+                edgeStatsService.incrementDownlinkMsgsPermanentlyFailed();
+
                 DownlinkResponseMsg downlinkResponseMsg = DownlinkResponseMsg.newBuilder()
                         .setDownlinkMsgId(downlinkMsg.getDownlinkMsgId())
                         .setSuccess(false).setErrorMsg(errorMsg).build();
@@ -727,6 +741,8 @@ public abstract class BaseCloudManagerService extends TbApplicationEventListener
     }
 
     private void processMsgPack(List<UplinkMsg> uplinkMsgPack) {
+        edgeStatsService.incrementUplinkMsgsAdded(uplinkMsgPack.size());
+        edgeStatsService.incrementUplinkMsgsLag(uplinkMsgPack.size());
         pendingMsgMap.clear();
         uplinkMsgPack.forEach(msg -> pendingMsgMap.put(msg.getUplinkMsgId(), msg));
         sendUplinkFuture = uplinkExecutor.schedule(() -> {
@@ -740,6 +756,7 @@ public abstract class BaseCloudManagerService extends TbApplicationEventListener
                     success = sendUplinkMsgPack(new LinkedBlockingQueue<>(pendingMsgMap.values())) && pendingMsgMap.isEmpty();
 
                     if (!success) {
+                        edgeStatsService.incrementUplinkMsgsTmpFailed(pendingMsgMap.size());
                         log.warn("Failed to deliver the batch: {}, attempt: {}", pendingMsgMap.values(), attempt);
                         try {
                             Thread.sleep(cloudEventStorageSettings.getSleepIntervalBetweenBatches());
@@ -752,12 +769,17 @@ public abstract class BaseCloudManagerService extends TbApplicationEventListener
                             log.error("Error during sleep between batches or on rate limit violation", e);
                         }
                     } else {
+                        edgeStatsService.decrementUplinkMsgsLag(uplinkMsgPack.size());
+                        edgeStatsService.incrementUplinkMsgsPushed(uplinkMsgPack.size());
                         log.info("Sending of [{}] uplink msg(s) took {} ms.", uplinkMsgPack.size(), System.currentTimeMillis() - startTime);
                     }
 
                     attempt++;
 
                     if (attempt > MAX_SEND_UPLINK_ATTEMPTS) {
+                        edgeStatsService.incrementUplinkMsgsPermanentlyFailed(pendingMsgMap.size());
+                        edgeStatsService.decrementUplinkMsgsLag(uplinkMsgPack.size());
+
                         log.warn("Failed to deliver the batch: after {} attempts. Next messages are going to be discarded {}",
                                 MAX_SEND_UPLINK_ATTEMPTS, pendingMsgMap.values());
                         sendUplinkFutureResult.set(false);
