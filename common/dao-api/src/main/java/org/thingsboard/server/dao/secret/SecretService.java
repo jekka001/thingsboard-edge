@@ -52,8 +52,6 @@ public interface SecretService extends EntityDaoService {
 
     SecretInfo findSecretInfoById(TenantId tenantId, SecretId secretId);
 
-    PageData<Secret> findSecretsByTenantId(TenantId tenantId, PageLink pageLink);
-
     Secret findSecretById(TenantId tenantId, SecretId secretId);
 
     Secret findSecretByName(TenantId tenantId, String name);
@@ -61,6 +59,8 @@ public interface SecretService extends EntityDaoService {
     SecretInfo findSecretInfoByName(TenantId tenantId, String name);
 
     List<String> findSecretNamesByTenantId(TenantId tenantId);
+
+    PageData<Secret> findSecretsByTenantId(TenantId tenantId, PageLink pageLink);
 
     PageData<SecretInfo> findSecretInfosByTenantId(TenantId tenantId, PageLink pageLink);
 

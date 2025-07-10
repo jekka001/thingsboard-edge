@@ -61,6 +61,7 @@ import org.thingsboard.server.gen.edge.v1.DeviceUpdateMsg;
 import org.thingsboard.server.gen.edge.v1.DownlinkMsg;
 import org.thingsboard.server.gen.edge.v1.DownlinkResponseMsg;
 import org.thingsboard.server.gen.edge.v1.EdgeConfiguration;
+import org.thingsboard.server.gen.edge.v1.EncryptionKeyUpdateMsg;
 import org.thingsboard.server.gen.edge.v1.EntityDataProto;
 import org.thingsboard.server.gen.edge.v1.EntityGroupUpdateMsg;
 import org.thingsboard.server.gen.edge.v1.EntityViewUpdateMsg;
@@ -423,6 +424,11 @@ public class EdgeImitator {
         if (downlinkMsg.getCalculatedFieldUpdateMsgCount() > 0) {
             for (CalculatedFieldUpdateMsg calculatedFieldUpdateMsg : downlinkMsg.getCalculatedFieldUpdateMsgList()) {
                 result.add(saveDownlinkMsg(calculatedFieldUpdateMsg));
+            }
+        }
+        if (downlinkMsg.getEncryptionKeyUpdateMsgCount() > 0) {
+            for (EncryptionKeyUpdateMsg encryptionKeyUpdateMsg : downlinkMsg.getEncryptionKeyUpdateMsgList()) {
+                result.add(saveDownlinkMsg(encryptionKeyUpdateMsg));
             }
         }
         if (downlinkMsg.getSecretUpdateMsgCount() > 0) {

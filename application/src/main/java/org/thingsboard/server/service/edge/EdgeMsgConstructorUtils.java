@@ -824,8 +824,6 @@ public class EdgeMsgConstructorUtils {
                 .setIdLSB(entityGroupId.getId().getLeastSignificantBits()).build();
     }
 
-
-
     public static GroupPermissionProto constructGroupPermissionProto(UpdateMsgType msgType, GroupPermission groupPermission) {
         return GroupPermissionProto.newBuilder().setMsgType(msgType).setEntity(JacksonUtil.toString(groupPermission))
                 .setIdMSB(groupPermission.getId().getId().getMostSignificantBits())
