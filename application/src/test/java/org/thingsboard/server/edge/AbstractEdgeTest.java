@@ -193,7 +193,7 @@ abstract public class AbstractEdgeTest extends AbstractControllerTest {
 
         edgeImitator = new EdgeImitator("localhost", 7070, edge.getRoutingKey(), edge.getSecret());
         // 31 connect messages + 6 installation messages
-        edgeImitator.expectMessageAmount(SYNC_MESSAGE_COUNT + 1);
+        edgeImitator.expectMessageAmount(SYNC_MESSAGE_COUNT);
         edgeImitator.ignoreType(OAuth2ClientUpdateMsg.class);
         edgeImitator.ignoreType(OAuth2DomainUpdateMsg.class);
         edgeImitator.connect();
