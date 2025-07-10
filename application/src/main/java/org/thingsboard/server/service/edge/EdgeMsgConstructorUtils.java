@@ -80,7 +80,6 @@ import org.thingsboard.server.common.data.id.DashboardId;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.DomainId;
-import org.thingsboard.server.common.data.id.EncryptionKeyId;
 import org.thingsboard.server.common.data.id.EntityGroupId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.EntityViewId;
@@ -765,13 +764,6 @@ public class EdgeMsgConstructorUtils {
         return EncryptionKeyUpdateMsg.newBuilder().setMsgType(msgType).setEntity(JacksonUtil.toString(encryptionKey))
                 .setIdMSB(encryptionKey.getId().getId().getMostSignificantBits())
                 .setIdLSB(encryptionKey.getId().getId().getLeastSignificantBits()).build();
-    }
-
-    public static EncryptionKeyUpdateMsg constructEncryptionKeyDeleteMsg(EncryptionKeyId encryptionKeyId) {
-        return EncryptionKeyUpdateMsg.newBuilder()
-                .setMsgType(UpdateMsgType.ENTITY_DELETED_RPC_MESSAGE)
-                .setIdMSB(encryptionKeyId.getId().getMostSignificantBits())
-                .setIdLSB(encryptionKeyId.getId().getLeastSignificantBits()).build();
     }
 
     public static SecretUpdateMsg constructSecretUpdatedMsg(UpdateMsgType msgType, Secret secret) {
