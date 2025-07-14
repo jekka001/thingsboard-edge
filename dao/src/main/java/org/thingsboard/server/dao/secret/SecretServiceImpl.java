@@ -54,6 +54,7 @@ import org.thingsboard.server.dao.rule.RuleChainDao;
 import org.thingsboard.server.dao.service.DataValidator;
 import org.thingsboard.server.dao.sql.HasSecretsEntityDao;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,20 +97,50 @@ public class SecretServiceImpl extends AbstractEntityService implements SecretSe
 
     @Override
     public Secret saveSecret(TenantId tenantId, Secret secret) {
+        Secret old = secretValidator.validate(secret, Secret::getTenantId);
+        return doSaveSecret(tenantId, secret, old, true);
+    }
+
+    // Edge only:
+    @Override
+    public Secret saveSecret(TenantId tenantId, Secret secret, boolean doValidate) {
+        Secret oldSecret = null;
+        if (doValidate) {
+            oldSecret = secretValidator.validate(secret, Secret::getTenantId);
+        } else if (secret.getId() != null) {
+            oldSecret = findSecretById(tenantId, secret.getId());
+        }
+
+        log.info("Saving Secret on Edge, rawValue length before save: {}", secret.getRawValue() == null ? 0 : secret.getRawValue().length);
+
+        if (secret.getRawValue() != null) {
+            log.info("Secret rawValue (Base64) before save: {}", Base64.getEncoder().encodeToString(secret.getRawValue()));
+        }
+
+        return doSaveSecret(tenantId, secret, oldSecret, false);
+    }
+
+    private Secret doSaveSecret(TenantId tenantId, Secret secret, Secret old, boolean encrypt) {
         log.trace("Executing saveSecret [{}]", secret);
         try {
-            Secret old = secretValidator.validate(secret, Secret::getTenantId);
-
             boolean isValueUpdated = false;
             if (secret.getValue() != null) {
-                byte[] encrypted = encryptionService.encrypt(tenantId, secret.getType(), secret.getRawValue());
-                secret.setRawValue(encrypted);
+                if(encrypt) {
+                    byte[] encrypted = encryptionService.encrypt(tenantId, secret.getType(), secret.getRawValue());
+                    secret.setRawValue(encrypted);
+                }
                 isValueUpdated = true;
             } else if (old != null) {
                 secret.setRawValue(old.getRawValue());
             }
 
             Secret savedSecret = secretDao.save(tenantId, secret);
+
+            log.info("Saved Secret on Edge, rawValue length after save: {}", savedSecret.getRawValue() == null ? 0 : savedSecret.getRawValue().length);
+            if (savedSecret.getRawValue() != null) {
+                log.info("Saved Secret rawValue (Base64): {}", Base64.getEncoder().encodeToString(savedSecret.getRawValue()));
+            }
+
             eventPublisher.publishEvent(SaveEntityEvent.builder().tenantId(tenantId).entityId(savedSecret.getId()).entity(savedSecret).created(secret.getId() == null).broadcastEvent(isValueUpdated).build());
             return savedSecret;
         } catch (Exception e) {

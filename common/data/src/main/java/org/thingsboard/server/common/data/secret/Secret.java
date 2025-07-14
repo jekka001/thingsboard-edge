@@ -39,7 +39,7 @@ import lombok.EqualsAndHashCode;
 import org.thingsboard.server.common.data.id.SecretId;
 
 import java.io.Serial;
-import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 @Schema
 @Data
@@ -52,14 +52,14 @@ public class Secret extends SecretInfo {
     @JsonIgnore
     private byte[] rawValue;
 
-    @Schema(description = "Secret value.", requiredMode = Schema.RequiredMode.REQUIRED, example = "Value")
+    @Schema(description = "Secret value in Base64 encoded string.", requiredMode = Schema.RequiredMode.REQUIRED, example = "VmFsdWU=")
     @JsonSetter("value")
     public void setValue(String value) {
         if (value == null) {
             this.rawValue = null;
             return;
         }
-        this.rawValue = value.getBytes(StandardCharsets.UTF_8);
+        this.rawValue = Base64.getDecoder().decode(value);
     }
 
     @JsonGetter("value")
@@ -67,7 +67,7 @@ public class Secret extends SecretInfo {
         if (this.rawValue == null) {
             return null;
         }
-        return new String(rawValue, StandardCharsets.UTF_8);
+        return Base64.getEncoder().encodeToString(rawValue);
     }
 
     public Secret() {
