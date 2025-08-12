@@ -1,0 +1,28 @@
+name: Edge.proto check
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  check-proto:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install protobuf tools
+        run: |
+          pip install protobuf
+
+      - name: Run edge.proto check
+        run: |
+          python3 .github/scripts/check_edge_proto.py
