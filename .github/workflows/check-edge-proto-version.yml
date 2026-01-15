@@ -1,0 +1,27 @@
+name: Test SOC2 Action
+
+on:
+  workflow_dispatch:   # ручний запуск з GitHub
+
+jobs:
+  audit-evidence:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: GitHub SOC2 Audit Evidence Exporter
+        uses: jekka001/audit-evidence@v1
+        with:
+          standard: SOC2
+          org: jekka001
+          repo: audit-evidence
+          license-key: ${{ secrets.AUDIT_EVIDENCE_LICENSE_KEY }}
+          create-zip: true
+
+      - name: Upload audit evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: soc2-evidence
+          path: audit-evidence/
